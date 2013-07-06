@@ -1,7 +1,7 @@
 #include "formats.h"
 #include <cmath> //frexp
 #include <cstring> //strlen
-#include <iostream> //debug
+//#include <iostream> //debug
 
 namespace binio
 {
@@ -177,7 +177,6 @@ namespace binio
         if(os.size()<os.tell()+4){os.resize(os.size()+4);}
 
         //Mantissa ( significand )
-        significand=(significand-0.5f)*2.0f; //First mantissa bit is always 1, so skip that
         for(size_t i=0; i<23; i++)
         {
             os.set_bit(startbit+22-i, significand>=0.5f);
@@ -205,7 +204,6 @@ namespace binio
         if(os.size()<os.tell()+8){os.resize(os.size()+8);}
 
         //Mantissa ( significand )
-        significand=(significand-0.5)*2.0; //First mantissa bit is always 1, so skip that
         for(size_t i=0; i<52; i++)
         {
             os.set_bit(startbit+51-i, significand>=0.5);
@@ -234,7 +232,6 @@ namespace binio
 
         //Get the mantissa ( significand )
         for(size_t i=0; i<23; i++){significand=(significand+is.get_bit(offs+i))/2.0f;}
-        significand=(significand+1.0f)/2.0f; //First mantissa bit is always 1, so add that
 
         //Exponent
         for(size_t i=0; i<8; i++){exponent+=(is.get_bit(offs+23+i))<<i;}
@@ -254,7 +251,6 @@ namespace binio
 
         //Get the mantissa ( significand )
         for(size_t i=0; i<52; i++){significand=(significand+is.get_bit(offs+i))/2.0;}
-        significand=(significand+1.0)/2.0; //First mantissa bit is always 1, so add that
 
         //Exponent
         for(size_t i=0; i<11; i++){exponent+=(is.get_bit(offs+52+i))<<i;}
