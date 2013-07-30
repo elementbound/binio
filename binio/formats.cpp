@@ -1,7 +1,6 @@
 #include "formats.h"
 #include <cmath> //frexp
 #include <cstring> //strlen
-//#include <iostream> //debug
 
 namespace binio
 {
@@ -11,37 +10,37 @@ namespace binio
 
     buffer& operator<<(buffer& os, char c)
     {
-        if(os.size()<os.tell()+1){os.resize(os.size()+1);}
-        size_t offs=os.tell()*8;
+        if(os.size()<os.tellp()+1){os.resize(os.size()+1);}
+        size_t offs=os.tellp()*8;
 
         if(c<0){c=-(c--); c=~c;}
         for(byte_t i=0; i<8; i++){os.set_bit(offs+i,(c>>i)&1);}
 
-        os.seek_rel(1);
+        os.seekp(1, 1);
         return os;
     };
 
     buffer& operator<<(buffer& os, short x)
     {
-        if(os.size()<os.tell()+2){os.resize(os.size()+2);}
-        size_t offs=os.tell()*8;
+        if(os.size()<os.tellp()+2){os.resize(os.size()+2);}
+        size_t offs=os.tellp()*8;
 
         if(x<0){x=-(x--); x=~x;}
         for(byte_t i=0; i<16; i++){os.set_bit(offs+i,(x>>i)&1);}
 
-        os.seek_rel(2);
+        os.seekp(2,1);
         return os;
     };
 
     buffer& operator<<(buffer& os, int x)
     {
-        if(os.size()<os.tell()+4){os.resize(os.size()+4);}
-        size_t offs=os.tell()*8;
+        if(os.size()<os.tellp()+4){os.resize(os.size()+4);}
+        size_t offs=os.tellp()*8;
 
         if(x<0){x=-(x--); x=~x;}
         for(byte_t i=0; i<32; i++){os.set_bit(offs+i,(x>>i)&1);}
 
-        os.seek_rel(4);
+        os.seekp(4,1);
         return os;
     };
 
@@ -49,39 +48,39 @@ namespace binio
 
     buffer& operator>>(buffer& is, char& ret)
     {
-        if(is.size()<is.tell()+1){return is;}
+        if(is.size()<is.tellg()+1){return is;}
 
-        size_t offs=is.tell()*8;
+        size_t offs=is.tellg()*8;
         ret=0;
         for(size_t i=0; i<7; i++){ret<<=1; ret+=is.get_bit(offs+6-i);}
         if(is.get_bit(offs+7)){ret-=1<<7;}
-        is.seek_rel(1);
+        is.seekg(1,1);
 
         return is;
     };
 
     buffer& operator>>(buffer& is, short& ret)
     {
-        if(is.size()<is.tell()+2){return is;}
+        if(is.size()<is.tellg()+2){return is;}
 
-        size_t offs=is.tell()*8;
+        size_t offs=is.tellg()*8;
         ret=0;
         for(size_t i=0; i<15; i++){ret<<=1; ret+=is.get_bit(offs+14-i);}
         if(is.get_bit(offs+15)){ret-=1<<15; ret+=1; /* wtf? */}
-        is.seek_rel(2);
+        is.seekg(2,1);
 
         return is;
     };
 
     buffer&   operator>>(buffer& is, int& ret)
     {
-        if(is.size()<is.tell()+4){return is;}
+        if(is.size()<is.tellg()+4){return is;}
 
-        size_t offs=is.tell()*8;
+        size_t offs=is.tellg()*8;
         ret=0;
         for(size_t i=0; i<31; i++){ret<<=1; ret+=is.get_bit(offs+30-i);}
         if(is.get_bit(offs+31)){ret-=1<<31;}
-        is.seek_rel(4);
+        is.seekg(4,1);
 
         return is;
     };
@@ -92,34 +91,34 @@ namespace binio
 
     buffer& operator<<(buffer& os, unsigned char c)
     {
-        if(os.size()<os.tell()+1){os.resize(os.size()+1);}
-        size_t offs=os.tell()*8;
+        if(os.size()<os.tellp()+1){os.resize(os.size()+1);}
+        size_t offs=os.tellp()*8;
 
         for(byte_t i=0; i<8; i++){os.set_bit(offs+i,(c>>i)&1);}
 
-        os.seek_rel(1);
+        os.seekp(1,1);
         return os;
     };
 
     buffer& operator<<(buffer& os, unsigned short x)
     {
-        if(os.size()<os.tell()+1){os.resize(os.size()+2);}
-        size_t offs=os.tell()*8;
+        if(os.size()<os.tellp()+2){os.resize(os.size()+2);}
+        size_t offs=os.tellp()*8;
 
         for(byte_t i=0; i<16; i++){os.set_bit(offs+i,(x>>i)&1);}
 
-        os.seek_rel(2);
+        os.seekp(2,1);
         return os;
     };
 
     buffer& operator<<(buffer& os, unsigned int x)
     {
-        if(os.size()<os.tell()+1){os.resize(os.size()+4);}
-        size_t offs=os.tell()*8;
+        if(os.size()<os.tellp()+4){os.resize(os.size()+4);}
+        size_t offs=os.tellp()*8;
 
         for(byte_t i=0; i<32; i++){os.set_bit(offs+i,(x>>i)&1);}
 
-        os.seek_rel(4);
+        os.seekp(4,1);
         return os;
     };
 
@@ -127,36 +126,36 @@ namespace binio
 
     buffer& operator>>(buffer& is, unsigned char& ret)
     {
-        if(is.size()<is.tell()+1){return is;}
+        if(is.size()<is.tellg()+1){return is;}
 
-        size_t offs=is.tell()*8;
+        size_t offs=is.tellg()*8;
         ret=0;
         for(size_t i=0; i<8; i++){ret<<=1; ret+=is.get_bit(offs+7-i);}
-        is.seek_rel(1);
+        is.seekg(1,1);
 
         return is;
     };
 
     buffer& operator>>(buffer& is, unsigned short& ret)
     {
-        if(is.size()<is.tell()+2){return is;}
+        if(is.size()<is.tellg()+2){return is;}
 
-        size_t offs=is.tell()*8;
+        size_t offs=is.tellg()*8;
         ret=0;
         for(size_t i=0; i<16; i++){ret<<=1; ret+=is.get_bit(offs+15-i);}
-        is.seek_rel(2);
+        is.seekg(2,1);
 
         return is;
     };
 
     buffer& operator>>(buffer& is, unsigned int& ret)
     {
-        if(is.size()<is.tell()+4){return is;}
+        if(is.size()<is.tellg()+4){return is;}
 
-        size_t offs=is.tell()*8;
+        size_t offs=is.tellg()*8;
         ret=0;
         for(size_t i=0; i<32; i++){ret<<=1; ret+=is.get_bit(offs+31-i);}
-        is.seek_rel(4);
+        is.seekg(4,1);
 
         return is;
     };
@@ -167,14 +166,12 @@ namespace binio
 
     buffer& operator<<(buffer& os, float x)
     {
-        using namespace std;
-
         int exponent;
         float significand=frexp(x, &exponent);
         if(significand<0.0f){significand=-significand;}
 
-        size_t startbit=os.tell()*8;
-        if(os.size()<os.tell()+4){os.resize(os.size()+4);}
+        size_t startbit=os.tellp()*8;
+        if(os.size()<os.tellp()+4){os.resize(os.size()+4);}
 
         //Mantissa ( significand )
         for(size_t i=0; i<23; i++)
@@ -190,7 +187,7 @@ namespace binio
 
         //Sign bit
         os.set_bit(startbit+31, x<0.0);
-        os.seek_rel(4);
+        os.seekp(4,1);
         return os;
     };
 
@@ -200,8 +197,8 @@ namespace binio
         double significand=frexp(x, &exponent);
         if(significand<0.0){significand=-significand;}
 
-        size_t startbit=os.tell()*8;
-        if(os.size()<os.tell()+8){os.resize(os.size()+8);}
+        size_t startbit=os.tellp()*8;
+        if(os.size()<os.tellp()+8){os.resize(os.size()+8);}
 
         //Mantissa ( significand )
         for(size_t i=0; i<52; i++)
@@ -217,7 +214,7 @@ namespace binio
 
         //Sign bit
         os.set_bit(startbit+63, x<0.0);
-        os.seek_rel(8);
+        os.seekp(8,1);
         return os;
     };
 
@@ -225,9 +222,9 @@ namespace binio
 
     buffer& operator>>(buffer& is, float& x)
     {
-        if(is.size()<is.tell()+4){return is;}
+        if(is.size()<is.tellg()+4){return is;}
 
-        size_t offs=is.tell()*8;
+        size_t offs=is.tellg()*8;
         int exponent=0; float significand=0.0f;
 
         //Get the mantissa ( significand )
@@ -238,15 +235,15 @@ namespace binio
         exponent-=(1<<7)-1;
 
         x=significand*pow(2.0f,exponent)*(is.get_bit(offs+31)?-1.0f:1.0f);
-        is.seek_rel(4);
+        is.seekg(4,1);
         return is;
     };
 
     buffer& operator>>(buffer& is, double& x)
     {
-        if(is.size()<is.tell()+8){return is;}
+        if(is.size()<is.tellg()+8){return is;}
 
-        size_t offs=is.tell()*8;
+        size_t offs=is.tellg()*8;
         int exponent=0; double significand=0.0;
 
         //Get the mantissa ( significand )
@@ -257,7 +254,7 @@ namespace binio
         exponent-=(1<<10)-1;
 
         x=significand*pow(2.0f,exponent)*(is.get_bit(offs+63)?-1.0f:1.0f);
-        is.seek_rel(8);
+        is.seekg(8,1);
         return is;
     };
 
@@ -276,12 +273,10 @@ namespace binio
 
     buffer& operator>>(buffer& is, char* str)
     {
-        size_t len=0, start=is.tell();
+        size_t len=0, start=is.tellg();
         while(is[start+len]!=0 && start+len<is.size()){len++;}
         is.read(str, len);
-        //str[len]='\0';
 
-        is.seek_rel(len);
         return is;
     };
 };

@@ -16,7 +16,8 @@ namespace binio
             byte_t m_Bitbuffer;
             byte_t m_Bitindex;
 
-            size_t m_Seek;
+            size_t m_SeekR;
+            size_t m_SeekW;
 
         public:
             buffer(void);
@@ -41,9 +42,10 @@ namespace binio
 
             size_t read(void* data, size_t size);
             void   write(const void* data, size_t size);
-            void   seek(size_t i);
-            void   seek_rel(int i);
-            size_t tell(void) const;
+            void   seekp(int i, bool rel=0);
+            void   seekg(int i, bool rel=0);
+            size_t tellp(void) const;
+            size_t tellg(void) const;
 
             void put(byte_t byte);
             byte_t get(void);

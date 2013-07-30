@@ -13,7 +13,8 @@ namespace binio
         m_Capacity(0),
         m_Bitbuffer(0),
         m_Bitindex(0),
-        m_Seek(0)
+        m_SeekR(0),
+        m_SeekW(0)
         {};
 
     buffer::buffer(const buffer& rhs)
@@ -27,7 +28,8 @@ namespace binio
         m_Bitbuffer=rhs.m_Bitbuffer;
         m_Bitindex=rhs.m_Bitindex;
 
-        m_Seek=rhs.m_Seek;
+        m_SeekR=rhs.m_SeekR;
+        m_SeekW=rhs.m_SeekW;
     };
 
     buffer::~buffer(void)
@@ -69,7 +71,8 @@ namespace binio
         m_Bitbuffer=0;
         m_Bitindex=0;
 
-        m_Seek=0;
+        m_SeekR=0;
+        m_SeekW=0;
     };
 
     void buffer::resize(size_t new_size)
@@ -102,7 +105,8 @@ namespace binio
             m_Size=new_size;
         }
 
-        if(m_Seek>=m_Size){m_Seek=m_Size-1;}
+        if(m_SeekR>=m_Size){m_SeekR=m_Size-1;}
+        if(m_SeekW>=m_Size){m_SeekW=m_Size-1;}
     };
 
     //=============================================================================================
@@ -182,46 +186,51 @@ namespace binio
 
     size_t buffer::read(void* data, size_t size)
     {
-        if(m_Seek+size>=m_Size){size=m_Size-m_Seek;}
+        if(m_SeekR+size>=m_Size){size=m_Size-m_SeekR;}
 
-        memcpy(data, m_Data+m_Seek,size);
-        m_Seek+=size;
+        memcpy(data, m_Data+m_SeekR,size);
+        m_SeekR+=size;
         return size;
     };
 
     void buffer::write(const void* data, size_t size)
     {
-        if(m_Seek+size>=m_Size){resize(m_Seek+size);}
+        if(m_SeekW+size>=m_Size){resize(m_SeekW+size);}
 
-        memcpy(m_Data+m_Seek, data,size);
-        m_Seek+=size;
+        memcpy(m_Data+m_SeekW, data,size);
+        m_SeekW+=size;
     };
 
-    void buffer::seek(size_t i)
+    void buffer::seekp(int i, bool rel)
     {
-        m_Seek=i;
+        m_SeekW=m_SeekW*rel+i;
     };
 
-    void buffer::seek_rel(int i)
+    void buffer::seekg(int i, bool rel)
     {
-        m_Seek+=i;
+        m_SeekR=m_SeekR*rel+i;
     };
 
-    size_t buffer::tell(void) const
+    size_t buffer::tellp(void) const
     {
-        return m_Seek;
+        return m_SeekW;
+    };
+
+    size_t buffer::tellg(void) const
+    {
+        return m_SeekR;
     };
 
     void buffer::put(byte_t byte)
     {
-        if(m_Seek==m_Size){resize(m_Size+1);}
-        m_Data[m_Seek++]=byte;
+        if(m_SeekW==m_Size){resize(m_Size+1);}
+        m_Data[m_SeekW++]=byte;
     };
 
     byte_t buffer::get(void)
     {
-        if(m_Seek>=m_Size){return 0;}
-        return m_Data[m_Seek++];
+        if(m_SeekR>=m_Size){return 0;}
+        return m_Data[m_SeekR++];
     };
 
     //=============================================================================================
