@@ -4,6 +4,65 @@
 namespace binio
 {
     //=============================================================================================
+    //Global init
+    //=============================================================================================
+    endian_t init(void)
+    {
+        unsigned short x=1;
+        unsigned char* b=(unsigned char*)&x;
+        if(b[0]==1){buffer::m_SysEndian=eLE;}
+        else{buffer::m_SysEndian=eBE;}
+
+        return buffer::m_SysEndian;
+    };
+
+    endian_t buffer::m_SysEndian;
+
+    //=============================================================================================
+    //Internal writers
+    //=============================================================================================
+    void buffer::write_raw(const byte_t* d, size_t s)
+    {
+        if(m_SeekW+s>m_Size){resize(m_SeekW+s);}
+
+        for(size_t i=0; i<s; i++)
+        {m_Data[m_SeekW+i]=*(d+i);}
+
+        m_SeekW+=s;
+    };
+
+    void buffer::write_swapped(const byte_t* d, size_t s)
+    {
+        if(m_SeekW+s>m_Size){resize(m_SeekW+s);}
+
+        for(size_t i=0; i<s; i++)
+        {m_Data[m_SeekW+s-(i+1)]=*(d+i);}
+
+        m_SeekW+=s;
+    };
+
+    //=============================================================================================
+    //Internal readers
+    //=============================================================================================
+    size_t buffer::read_raw(byte_t* d, size_t s)
+    {
+        if(m_SeekR+s>m_Size){return 0;}
+        for(size_t i=0; i<s; i++){d[i]=m_Data[m_SeekR+i];}
+
+        m_SeekR+=s;
+        return s;
+    };
+
+    size_t buffer::read_swapped(byte_t* d, size_t s)
+    {
+        if(m_SeekR+s>m_Size){return 0;}
+        for(size_t i=0; i<s; i++){d[i]=m_Data[m_SeekR+s-(i+1)];}
+
+        m_SeekR+=s;
+        return s;
+    };
+
+    //=============================================================================================
     //Constructors, destructors
     //=============================================================================================
 
@@ -14,7 +73,11 @@ namespace binio
         m_Bitbuffer(0),
         m_Bitindex(0),
         m_SeekR(0),
-        m_SeekW(0)
+        m_SeekW(0),
+
+        m_Endian(m_SysEndian),
+        m_writeelem(&buffer::write_raw),
+        m_readelem(&buffer::read_raw)
         {};
 
     buffer::buffer(const buffer& rhs)
@@ -30,6 +93,10 @@ namespace binio
 
         m_SeekR=rhs.m_SeekR;
         m_SeekW=rhs.m_SeekW;
+
+        m_Endian=rhs.m_Endian;
+        m_writeelem=rhs.m_writeelem;
+        m_readelem=rhs.m_readelem;
     };
 
     buffer::~buffer(void)
@@ -38,7 +105,7 @@ namespace binio
     };
 
     //=============================================================================================
-    //Getters/properties
+    //Properties
     //=============================================================================================
 
     void* buffer::data(void) const
@@ -54,6 +121,54 @@ namespace binio
     size_t buffer::capacity(void) const
     {
         return m_Capacity;
+    };
+
+    //=============================================================================================
+    //Endianness
+    //=============================================================================================
+    endian_t buffer::get_sys_endianness(void) const
+    {
+        return m_SysEndian;
+    };
+
+    endian_t buffer::get_endianness(void) const
+    {
+        return m_Endian;
+    };
+
+    void buffer::set_endianness(endian_t e)
+    {
+        m_Endian=e;
+
+        if(m_Endian==m_SysEndian)
+        {
+            m_writeelem=&buffer::write_raw;
+            m_readelem=&buffer::read_raw;
+        }
+        else
+        {
+            m_writeelem=&buffer::write_swapped;
+            m_readelem=&buffer::read_swapped;
+        }
+    };
+
+    endian_t buffer::swap_endianness(void)
+    {
+        if(m_Endian==eLE){m_Endian=eBE;}
+        else{m_Endian=eLE;}
+
+        if(m_Endian==m_SysEndian)
+        {
+            m_writeelem=&buffer::write_raw;
+            m_readelem=&buffer::read_raw;
+        }
+        else
+        {
+            m_writeelem=&buffer::write_swapped;
+            m_readelem=&buffer::read_swapped;
+        }
+
+        return m_Endian;
     };
 
     //=============================================================================================
@@ -231,6 +346,19 @@ namespace binio
     {
         if(m_SeekR>=m_Size){return 0;}
         return m_Data[m_SeekR++];
+    };
+
+    //=============================================================================================
+    //Endian-correct I/O
+    //=============================================================================================
+    void buffer::write_element(const void* d, size_t s)
+    {
+        (this->*m_writeelem)((const byte_t*)d,s);
+    };
+
+    size_t buffer::read_element(void* d, size_t s)
+    {
+        return (this->*m_readelem)((byte_t*)d,s);
     };
 
     //=============================================================================================

@@ -8,80 +8,41 @@ namespace binio
     //Signed integers
     //=============================================================================================
 
-    buffer& operator<<(buffer& os, char c)
+    buffer& write_char(buffer& os, int8_t c)
     {
-        if(os.size()<os.tellp()+1){os.resize(os.size()+1);}
-        size_t offs=os.tellp()*8;
-
-        if(c<0){c=-(c--); c=~c;}
-        for(byte_t i=0; i<8; i++){os.set_bit(offs+i,(c>>i)&1);}
-
-        os.seekp(1, 1);
+        os.put(c);
         return os;
     };
 
-    buffer& operator<<(buffer& os, short x)
+    buffer& write_short(buffer& os, int16_t x)
     {
-        if(os.size()<os.tellp()+2){os.resize(os.size()+2);}
-        size_t offs=os.tellp()*8;
-
-        if(x<0){x=-(x--); x=~x;}
-        for(byte_t i=0; i<16; i++){os.set_bit(offs+i,(x>>i)&1);}
-
-        os.seekp(2,1);
+        os.write_element(&x,2);
         return os;
     };
 
-    buffer& operator<<(buffer& os, int x)
+    buffer& write_int(buffer& os, int32_t x)
     {
-        if(os.size()<os.tellp()+4){os.resize(os.size()+4);}
-        size_t offs=os.tellp()*8;
-
-        if(x<0){x=-(x--); x=~x;}
-        for(byte_t i=0; i<32; i++){os.set_bit(offs+i,(x>>i)&1);}
-
-        os.seekp(4,1);
+        os.write_element(&x,4);
         return os;
     };
 
     //
 
-    buffer& operator>>(buffer& is, char& ret)
+    buffer& read_char(buffer& is, int8_t& ret)
     {
-        if(is.size()<is.tellg()+1){return is;}
-
-        size_t offs=is.tellg()*8;
-        ret=0;
-        for(size_t i=0; i<7; i++){ret<<=1; ret+=is.get_bit(offs+6-i);}
-        if(is.get_bit(offs+7)){ret-=1<<7;}
-        is.seekg(1,1);
-
+        ret=is.get();
         return is;
     };
 
-    buffer& operator>>(buffer& is, short& ret)
+    buffer& read_short(buffer& is, int16_t& ret)
     {
-        if(is.size()<is.tellg()+2){return is;}
-
-        size_t offs=is.tellg()*8;
-        ret=0;
-        for(size_t i=0; i<15; i++){ret<<=1; ret+=is.get_bit(offs+14-i);}
-        if(is.get_bit(offs+15)){ret-=1<<15; ret+=1; /* wtf? */}
-        is.seekg(2,1);
-
+        is.read_element(&ret, 2);
         return is;
     };
 
-    buffer&   operator>>(buffer& is, int& ret)
+    buffer& read_int(buffer& is, int32_t& ret)
     {
-        if(is.size()<is.tellg()+4){return is;}
-
-        size_t offs=is.tellg()*8;
-        ret=0;
-        for(size_t i=0; i<31; i++){ret<<=1; ret+=is.get_bit(offs+30-i);}
-        if(is.get_bit(offs+31)){ret-=1<<31;}
-        is.seekg(4,1);
-
+        is.read_element(&ret, 4);
         return is;
     };
 
@@ -89,74 +50,41 @@ namespace binio
     //Unsigned integers
     //=============================================================================================
 
-    buffer& operator<<(buffer& os, unsigned char c)
+    buffer& write_byte(buffer& os, uint8_t c)
     {
-        if(os.size()<os.tellp()+1){os.resize(os.size()+1);}
-        size_t offs=os.tellp()*8;
-
-        for(byte_t i=0; i<8; i++){os.set_bit(offs+i,(c>>i)&1);}
-
-        os.seekp(1,1);
+        os.put(c);
         return os;
     };
 
-    buffer& operator<<(buffer& os, unsigned short x)
+    buffer& write_ushort(buffer& os, uint16_t x)
     {
-        if(os.size()<os.tellp()+2){os.resize(os.size()+2);}
-        size_t offs=os.tellp()*8;
-
-        for(byte_t i=0; i<16; i++){os.set_bit(offs+i,(x>>i)&1);}
-
-        os.seekp(2,1);
+        os.write_element(&x,2);
         return os;
     };
 
-    buffer& operator<<(buffer& os, unsigned int x)
+    buffer& write_uint(buffer& os, uint32_t x)
     {
-        if(os.size()<os.tellp()+4){os.resize(os.size()+4);}
-        size_t offs=os.tellp()*8;
-
-        for(byte_t i=0; i<32; i++){os.set_bit(offs+i,(x>>i)&1);}
-
-        os.seekp(4,1);
+        os.write_element(&x,4);
         return os;
     };
 
     //
 
-    buffer& operator>>(buffer& is, unsigned char& ret)
+    buffer& read_byte(buffer& is, uint8_t& ret)
     {
-        if(is.size()<is.tellg()+1){return is;}
-
-        size_t offs=is.tellg()*8;
-        ret=0;
-        for(size_t i=0; i<8; i++){ret<<=1; ret+=is.get_bit(offs+7-i);}
-        is.seekg(1,1);
-
+        ret=is.get();
         return is;
     };
 
-    buffer& operator>>(buffer& is, unsigned short& ret)
+    buffer& read_ushort(buffer& is, uint16_t& ret)
     {
-        if(is.size()<is.tellg()+2){return is;}
-
-        size_t offs=is.tellg()*8;
-        ret=0;
-        for(size_t i=0; i<16; i++){ret<<=1; ret+=is.get_bit(offs+15-i);}
-        is.seekg(2,1);
-
+        is.read_element(&ret,2);
         return is;
     };
 
-    buffer& operator>>(buffer& is, unsigned int& ret)
+    buffer& read_uint(buffer& is, uint32_t& ret)
     {
-        if(is.size()<is.tellg()+4){return is;}
-
-        size_t offs=is.tellg()*8;
-        ret=0;
-        for(size_t i=0; i<32; i++){ret<<=1; ret+=is.get_bit(offs+31-i);}
-        is.seekg(4,1);
-
+        is.read_element(&ret,4);
         return is;
     };
 
@@ -164,97 +92,37 @@ namespace binio
     //Floats
     //=============================================================================================
 
-    buffer& operator<<(buffer& os, float x)
+    buffer& write_float(buffer& os, float x)
     {
-        int exponent;
-        float significand=frexp(x, &exponent);
-        if(significand<0.0f){significand=-significand;}
-
-        size_t startbit=os.tellp()*8;
-        if(os.size()<os.tellp()+4){os.resize(os.size()+4);}
-
-        //Mantissa ( significand )
-        for(size_t i=0; i<23; i++)
-        {
-            os.set_bit(startbit+22-i, significand>=0.5f);
-            if(significand>=0.5f){significand-=0.5f;}
-            significand*=2.0f;
-        }
-
-        //Exponent
-        exponent+=(1<<7)-1;
-        for(size_t i=0; i<8; i++){os.set_bit(startbit+23+i, (exponent>>i)&1);}
-
-        //Sign bit
-        os.set_bit(startbit+31, x<0.0);
-        os.seekp(4,1);
+        uint32_t u;
+        memcpy(&u,&x, 4);
+        os.write_element(&u,4);
         return os;
     };
 
-    buffer& operator<<(buffer& os, double x)
+    buffer& write_double(buffer& os, double x)
     {
-        int exponent;
-        double significand=frexp(x, &exponent);
-        if(significand<0.0){significand=-significand;}
-
-        size_t startbit=os.tellp()*8;
-        if(os.size()<os.tellp()+8){os.resize(os.size()+8);}
-
-        //Mantissa ( significand )
-        for(size_t i=0; i<52; i++)
-        {
-            os.set_bit(startbit+51-i, significand>=0.5);
-            if(significand>=0.5){significand-=0.5;}
-            significand*=2.0;
-        }
-
-        //Exponent
-        exponent+=(1<<10)-1;
-        for(size_t i=0; i<11; i++){os.set_bit(startbit+52+i, (exponent>>i)&1);}
-
-        //Sign bit
-        os.set_bit(startbit+63, x<0.0);
-        os.seekp(8,1);
+        uint64_t u;
+        memcpy(&u,&x, 8);
+        os.write_element(&u,8);
         return os;
     };
 
     //
 
-    buffer& operator>>(buffer& is, float& x)
+    buffer& read_float(buffer& is, float& x)
     {
-        if(is.size()<is.tellg()+4){return is;}
-
-        size_t offs=is.tellg()*8;
-        int exponent=0; float significand=0.0f;
-
-        //Get the mantissa ( significand )
-        for(size_t i=0; i<23; i++){significand=(significand+is.get_bit(offs+i))/2.0f;}
-
-        //Exponent
-        for(size_t i=0; i<8; i++){exponent+=(is.get_bit(offs+23+i))<<i;}
-        exponent-=(1<<7)-1;
-
-        x=significand*pow(2.0f,exponent)*(is.get_bit(offs+31)?-1.0f:1.0f);
-        is.seekg(4,1);
+        uint32_t u;
+        is.read_element(&u,4);
+        memcpy(&x,&u,4);
         return is;
     };
 
-    buffer& operator>>(buffer& is, double& x)
+    buffer& read_double(buffer& is, double& x)
     {
-        if(is.size()<is.tellg()+8){return is;}
-
-        size_t offs=is.tellg()*8;
-        int exponent=0; double significand=0.0;
-
-        //Get the mantissa ( significand )
-        for(size_t i=0; i<52; i++){significand=(significand+is.get_bit(offs+i))/2.0;}
-
-        //Exponent
-        for(size_t i=0; i<11; i++){exponent+=(is.get_bit(offs+52+i))<<i;}
-        exponent-=(1<<10)-1;
-
-        x=significand*pow(2.0f,exponent)*(is.get_bit(offs+63)?-1.0f:1.0f);
-        is.seekg(8,1);
+        uint64_t u;
+        is.read_element(&u,8);
+        memcpy(&x,&u,8);
         return is;
     };
 
@@ -262,7 +130,7 @@ namespace binio
     //Strings
     //=============================================================================================
 
-    buffer& operator<<(buffer& os, const char* str)
+    buffer& write_string(buffer& os, const char* str)
     {
         size_t len=strlen(str);
         os.write(str,len);
@@ -271,7 +139,7 @@ namespace binio
         return os;
     };
 
-    buffer& operator>>(buffer& is, char* str)
+    buffer& read_string(buffer& is, char* str)
     {
         size_t len=0, start=is.tellg();
         while(is[start+len]!=0 && start+len<is.size()){len++;}
@@ -279,4 +147,36 @@ namespace binio
 
         return is;
     };
+
+    //=============================================================================================
+    //Aliases
+    //=============================================================================================
+    //Integers
+    buffer& operator<<(buffer& os, int8_t c){return write_char(os,c);};
+    buffer& operator<<(buffer& os, int16_t x){return write_short(os,x);};
+    buffer& operator<<(buffer& os, int32_t x){return write_int(os,x);};
+
+    buffer& operator>>(buffer& is, int8_t& c){return read_char(is,c);};
+    buffer& operator>>(buffer& is, int16_t& c){return read_short(is,c);};
+    buffer& operator>>(buffer& is, int32_t& c){return read_int(is,c);};
+
+    //Unsigned integers
+    buffer& operator<<(buffer& os, uint8_t c){return write_byte(os,c);};
+    buffer& operator<<(buffer& os, uint16_t x){return write_ushort(os,x);};
+    buffer& operator<<(buffer& os, uint32_t x){return write_uint(os,x);};
+
+    buffer& operator>>(buffer& is, uint8_t& c){return read_byte(is,c);};
+    buffer& operator>>(buffer& is, uint16_t& c){return read_ushort(is,c);};
+    buffer& operator>>(buffer& is, uint32_t& c){return read_uint(is,c);};
+
+    //Floats
+    buffer& operator<<(buffer& os, float x){return write_float(os,x);};
+    buffer& operator<<(buffer& os, double x){return write_double(os,x);};
+
+    buffer& operator>>(buffer& is, float& x){return read_float(is,x);};
+    buffer& operator>>(buffer& is, double& x){return read_double(is,x);};
+
+    //Strings
+    buffer& operator<<(buffer& os, const char* str){return write_string(os,str);};
+    buffer& operator>>(buffer& is, char* str){return read_string(is,str);};
 };
