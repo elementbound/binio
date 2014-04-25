@@ -100,6 +100,6 @@ namespace binio
 
             friend endian_t init(void);
     };
-};
+}
 
 #endif

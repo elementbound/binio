@@ -14,7 +14,7 @@ namespace binio
         else{buffer::m_SysEndian=eBE;}
 
         return buffer::m_SysEndian;
-    };
+    }
 
     endian_t buffer::m_SysEndian;
 
@@ -29,7 +29,7 @@ namespace binio
         {m_Data[m_SeekW+i]=*(d+i);}
 
         m_SeekW+=s;
-    };
+    }
 
     void buffer::write_swapped(const byte_t* d, size_t s)
     {
@@ -39,7 +39,7 @@ namespace binio
         {m_Data[m_SeekW+s-(i+1)]=*(d+i);}
 
         m_SeekW+=s;
-    };
+    }
 
     //=============================================================================================
     //Internal readers
@@ -51,7 +51,7 @@ namespace binio
 
         m_SeekR+=s;
         return s;
-    };
+    }
 
     size_t buffer::read_swapped(byte_t* d, size_t s)
     {
@@ -60,7 +60,7 @@ namespace binio
 
         m_SeekR+=s;
         return s;
-    };
+    }
 
     //=============================================================================================
     //Constructors, destructors
@@ -78,7 +78,7 @@ namespace binio
         m_Endian(m_SysEndian),
         m_writeelem(&buffer::write_raw),
         m_readelem(&buffer::read_raw)
-        {};
+        {}
 
     buffer::buffer(const buffer& rhs)
     {
@@ -97,12 +97,12 @@ namespace binio
         m_Endian=rhs.m_Endian;
         m_writeelem=rhs.m_writeelem;
         m_readelem=rhs.m_readelem;
-    };
+    }
 
     buffer::~buffer(void)
     {
         free();
-    };
+    }
 
     //=============================================================================================
     //Properties
@@ -111,17 +111,17 @@ namespace binio
     void* buffer::data(void) const
     {
         return m_Data;
-    };
+    }
 
     size_t buffer::size(void) const
     {
         return m_Size;
-    };
+    }
 
     size_t buffer::capacity(void) const
     {
         return m_Capacity;
-    };
+    }
 
     //=============================================================================================
     //Endianness
@@ -129,12 +129,12 @@ namespace binio
     endian_t buffer::get_sys_endianness(void) const
     {
         return m_SysEndian;
-    };
+    }
 
     endian_t buffer::get_endianness(void) const
     {
         return m_Endian;
-    };
+    }
 
     void buffer::set_endianness(endian_t e)
     {
@@ -150,7 +150,7 @@ namespace binio
             m_writeelem=&buffer::write_swapped;
             m_readelem=&buffer::read_swapped;
         }
-    };
+    }
 
     endian_t buffer::swap_endianness(void)
     {
@@ -169,7 +169,7 @@ namespace binio
         }
 
         return m_Endian;
-    };
+    }
 
     //=============================================================================================
     //Modifiers
@@ -188,7 +188,7 @@ namespace binio
 
         m_SeekR=0;
         m_SeekW=0;
-    };
+    }
 
     void buffer::resize(size_t new_size)
     {
@@ -222,7 +222,7 @@ namespace binio
 
         if(m_SeekR>=m_Size){m_SeekR=m_Size-1;}
         if(m_SeekW>=m_Size){m_SeekW=m_Size-1;}
-    };
+    }
 
     //=============================================================================================
     //Stack - push
@@ -232,13 +232,13 @@ namespace binio
     {
         resize(m_Size+1);
         m_Data[m_Size-1]=byte;
-    };
+    }
 
     void buffer::push(void* data, size_t size)
     {
         resize(m_Size+size);
         memcpy(m_Data+m_Size-size, data, size);
-    };
+    }
 
     //=============================================================================================
     //Stack - pop
@@ -261,7 +261,7 @@ namespace binio
             resize(m_Size-1);
             return m_Data[m_Size];
         }
-    };
+    }
 
     //Please note: the bytes are not in reverse order.
     //This is not the same as repeat(n){buff.pop();}
@@ -272,7 +272,7 @@ namespace binio
         memcpy(data,m_Data,size);
         resize(m_Size-size);
         return size;
-    };
+    }
 
     //=============================================================================================
     //Pushing bits
@@ -285,7 +285,7 @@ namespace binio
         m_Bitbuffer|=val<<m_Bitindex;
         m_Bitindex++;
         if(m_Bitindex==8){flush_bits();}
-    };
+    }
 
     void buffer::flush_bits(void)
     {
@@ -293,7 +293,7 @@ namespace binio
         push(m_Bitbuffer);
         m_Bitindex=0;
         m_Bitbuffer=0;
-    };
+    }
 
     //=============================================================================================
     //fstream-like stuff
@@ -306,7 +306,7 @@ namespace binio
         memcpy(data, m_Data+m_SeekR,size);
         m_SeekR+=size;
         return size;
-    };
+    }
 
     void buffer::write(const void* data, size_t size)
     {
@@ -314,39 +314,39 @@ namespace binio
 
         memcpy(m_Data+m_SeekW, data,size);
         m_SeekW+=size;
-    };
+    }
 
     void buffer::seekp(int i, bool rel)
     {
         m_SeekW=m_SeekW*rel+i;
-    };
+    }
 
     void buffer::seekg(int i, bool rel)
     {
         m_SeekR=m_SeekR*rel+i;
-    };
+    }
 
     size_t buffer::tellp(void) const
     {
         return m_SeekW;
-    };
+    }
 
     size_t buffer::tellg(void) const
     {
         return m_SeekR;
-    };
+    }
 
     void buffer::put(byte_t byte)
     {
         if(m_SeekW==m_Size){resize(m_Size+1);}
         m_Data[m_SeekW++]=byte;
-    };
+    }
 
     byte_t buffer::get(void)
     {
         if(m_SeekR>=m_Size){return 0;}
         return m_Data[m_SeekR++];
-    };
+    }
 
     //=============================================================================================
     //Endian-correct I/O
@@ -354,12 +354,12 @@ namespace binio
     void buffer::write_element(const void* d, size_t s)
     {
         (this->*m_writeelem)((const byte_t*)d,s);
-    };
+    }
 
     size_t buffer::read_element(void* d, size_t s)
     {
         return (this->*m_readelem)((byte_t*)d,s);
-    };
+    }
 
     //=============================================================================================
     //Getters
@@ -369,13 +369,13 @@ namespace binio
     {
         //What if size is zero?
         return m_Data[i];
-    };
+    }
 
     const byte_t& buffer::byte(size_t i) const
     {
         //What if size is zero?
         return m_Data[i];
-    };
+    }
 
     byte_t& buffer::operator[](size_t i) {return byte(i);}
     const byte_t& buffer::operator[](size_t i) const {return byte(i);}
@@ -394,7 +394,7 @@ namespace binio
         if(byte_index>=size()){return;}
         if(v){m_Data[byte_index]|=1<<bit_index;}
         else{m_Data[byte_index]&=~(1<<bit_index);}
-    };
+    }
 
     bool buffer::get_bit(size_t i) const
     {
@@ -404,5 +404,5 @@ namespace binio
 
         if(byte_index>=size()){return 0;}
         return ((byte(byte_index)>>bit_index)&1)!=0;
-    };
-};
+    }
+}

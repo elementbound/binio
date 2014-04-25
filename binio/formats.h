@@ -2,6 +2,7 @@
 #define _H_BINIO_FORMATS_H_
 
 #include "buffer.h"
+#include <fstream>
 
 namespace binio
 {
@@ -9,22 +10,22 @@ namespace binio
     //write/read
 
     //Integers
-    buffer& write_char(buffer& os, int8_t c);
-    buffer& write_short(buffer& os, int16_t x);
-    buffer& write_int(buffer& os, int32_t x);
+    buffer& write_char(buffer& os, char c);
+    buffer& write_short(buffer& os, short x);
+    buffer& write_int(buffer& os, int x);
 
-    buffer& read_char(buffer& is, int8_t& c);
-    buffer& read_short(buffer& is, int16_t& c);
-    buffer& read_int(buffer& is, int32_t& c);
+    buffer& read_char(buffer& is, char& c);
+    buffer& read_short(buffer& is, short& c);
+    buffer& read_int(buffer& is, int& c);
 
     //Unsigned integers
-    buffer& write_byte(buffer& os, uint8_t c);
-    buffer& write_ushort(buffer& os, uint16_t x);
-    buffer& write_uint(buffer& os, uint32_t x);
+    buffer& write_byte(buffer& os, unsigned char c);
+    buffer& write_ushort(buffer& os, unsigned short x);
+    buffer& write_uint(buffer& os, unsigned int x);
 
-    buffer& read_byte(buffer& is, uint8_t& c);
-    buffer& read_ushort(buffer& is, uint16_t& c);
-    buffer& read_ushort(buffer& is, uint32_t& c);
+    buffer& read_byte(buffer& is, unsigned char& c);
+    buffer& read_ushort(buffer& is, unsigned short& c);
+    buffer& read_ushort(buffer& is, unsigned int& c);
 
     //Floats
     buffer& write_float(buffer& os, float x);
@@ -41,22 +42,22 @@ namespace binio
     //operator<<
 
     //Integers
-    buffer& operator<<(buffer& os, int8_t c);
-    buffer& operator<<(buffer& os, int16_t x);
-    buffer& operator<<(buffer& os, int32_t x);
+    buffer& operator<<(buffer& os, char c);
+    buffer& operator<<(buffer& os, short x);
+    buffer& operator<<(buffer& os, int x);
 
-    buffer& operator>>(buffer& is, int8_t& c);
-    buffer& operator>>(buffer& is, int16_t& c);
-    buffer& operator>>(buffer& is, int32_t& c);
+    buffer& operator>>(buffer& is, char& c);
+    buffer& operator>>(buffer& is, short& c);
+    buffer& operator>>(buffer& is, int& c);
 
     //Unsigned integers
-    buffer& operator<<(buffer& os, uint8_t c);
-    buffer& operator<<(buffer& os, uint16_t x);
-    buffer& operator<<(buffer& os, uint32_t x);
+    buffer& operator<<(buffer& os, unsigned char c);
+    buffer& operator<<(buffer& os, unsigned short x);
+    buffer& operator<<(buffer& os, unsigned int x);
 
-    buffer& operator>>(buffer& is, uint8_t& c);
-    buffer& operator>>(buffer& is, uint16_t& c);
-    buffer& operator>>(buffer& is, uint32_t& c);
+    buffer& operator>>(buffer& is, unsigned char& c);
+    buffer& operator>>(buffer& is, unsigned short& c);
+    buffer& operator>>(buffer& is, unsigned int& c);
 
     //Floats
     buffer& operator<<(buffer& os, float x);
@@ -68,6 +69,9 @@ namespace binio
     //Strings
     buffer& operator<<(buffer& os, const char* str);
     buffer& operator>>(buffer& is, char* str);
-};
+
+    //fstream
+    std::ostream& operator<<(std::ostream& os, binio::buffer& b);
+}
 
 #endif
